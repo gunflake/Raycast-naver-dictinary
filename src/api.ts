@@ -35,9 +35,8 @@ export const getDictionaryData = async (word: string): Promise<DictionaryEntry[]
 
 const processData = async (data: any) => {
   try {
-    const results: DictionaryEntry[] = [];
+    const results: DictionaryEntry[] = []; 
 
-    console.log(JSON.stringify(data));
 
     for (const items of data["items"]) {
       for (const item of items) {
