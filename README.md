@@ -8,6 +8,9 @@ This extension is for searching English-Korean dictionary on Naver. If you searc
   - For example, the result is 'apple, apology, apologize' then 'CMD + 1' will copy 'apple' to clipboard.
 - CMD + `: Open browser and search title on Naver dictionary.
 
+### How to install
+1. npm install
+2. npm run dev (Raycast must be installed)
 
 ### Reference 
 - [alfnaversearch](https://github.com/Kuniz/alfnaversearch)
