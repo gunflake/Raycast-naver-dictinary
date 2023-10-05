@@ -2,6 +2,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { useState } from "react";
 import { useDebounce } from "react-use";
 import { DictionaryEntry, getDictionaryData } from "./api";
+import { getNaverDictionaryUrl } from "./function";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -39,7 +40,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={el.title} />
-              {/*<Action.OpenInBrowser url={getNaverDictionaryUrl(el.title)} />*/}
+              <Action.CopyToClipboard content={el.subtitle.split(",")[0]} shortcut={{ modifiers: ["cmd"], key: "1" }} />
+              <Action.CopyToClipboard content={el.subtitle.split(",")[1]} shortcut={{ modifiers: ["cmd"], key: "2" }} />
+              <Action.CopyToClipboard content={el.subtitle.split(",")[2]} shortcut={{ modifiers: ["cmd"], key: "3" }} />
+              <Action.CopyToClipboard content={el.subtitle.split(",")[3]} shortcut={{ modifiers: ["cmd"], key: "4" }} />
+              <Action.OpenInBrowser url={getNaverDictionaryUrl(el.title)} shortcut={{ modifiers: ["cmd"], key: "`" }} />
             </ActionPanel>
           }
         />
