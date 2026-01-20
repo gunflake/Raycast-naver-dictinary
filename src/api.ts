@@ -1,15 +1,19 @@
 import axios from "axios";
 import * as crypto from "crypto";
+import { DictionaryEntry } from "./types";
 
 const NAVER_DICTIONARY_URL = "https://ac-dict.naver.com/enko/ac";
 
-export interface DictionaryEntry {
-  id: string;
-  title: string;
-  subtitle: string;
-}
+// DictionaryEntry는 types.ts에서 re-export
+export type { DictionaryEntry } from "./types";
 
 export const getDictionaryData = async (word: string): Promise<DictionaryEntry[]> => {
+  // 빈 값 검증 - 조기 반환
+  if (!word || !word.trim()) {
+    return [];
+  }
+
+  const trimmedWord = word.trim();
   const url = NAVER_DICTIONARY_URL;
   const params = {
     q_enc: "utf-8",
@@ -19,7 +23,7 @@ export const getDictionaryData = async (word: string): Promise<DictionaryEntry[]
     r_lt: 10001,
     r_unicode: 0,
     r_escape: 1,
-    q: word,
+    q: trimmedWord,
   };
 
   try {
@@ -35,8 +39,7 @@ export const getDictionaryData = async (word: string): Promise<DictionaryEntry[]
 
 const processData = async (data: any) => {
   try {
-    const results: DictionaryEntry[] = []; 
-
+    const results: DictionaryEntry[] = [];
 
     for (const items of data["items"]) {
       for (const item of items) {
