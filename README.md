@@ -13,7 +13,7 @@ This extension is for searching English-Korean dictionary on Naver. If you searc
 #### 사전 요구사항
 - [Raycast](https://raycast.com/) 설치 필요
 - [Node.js](https://nodejs.org/) 18.x 이상
-- npm 또는 yarn
+- pnpm (권장)
 
 #### 설치 단계
 
@@ -25,12 +25,12 @@ cd Raycast-naver-dictinary
 
 **2. 의존성 설치**
 ```bash
-npm install
+pnpm install
 ```
 
 **3. 개발 모드로 실행**
 ```bash
-npm run dev
+pnpm run dev
 ```
 > 이 명령어를 실행하면 Raycast가 자동으로 확장 프로그램을 인식합니다.
 
@@ -48,7 +48,7 @@ npm run dev
 
 #### 빌드 (배포용)
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Reference 
