@@ -37,7 +37,11 @@ export const getDictionaryData = async (word: string): Promise<DictionaryEntry[]
   }
 };
 
-const processData = async (data: any) => {
+interface AutocompleteResponse {
+  items: string[][][][];
+}
+
+const processData = async (data: AutocompleteResponse) => {
   try {
     const results: DictionaryEntry[] = [];
 

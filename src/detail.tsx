@@ -59,11 +59,7 @@ export function WordDetail({ word, subtitle }: WordDetailProps) {
             />
           )}
           {detail?.audioUrl && (
-            <Action.OpenInBrowser
-              title="발음 듣기"
-              url={detail.audioUrl}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
-            />
+            <Action.OpenInBrowser title="발음 듣기" url={detail.audioUrl} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           )}
         </ActionPanel>
       }
@@ -83,14 +79,6 @@ function WordMetadata({ detail }: { detail: WordDetailData }) {
       {phoneticText && <Detail.Metadata.Label title="발음" text={phoneticText} />}
       {detail.dictType && <Detail.Metadata.Label title="유형" text={detail.dictType} />}
       {detail.source && <Detail.Metadata.Label title="출처" text={detail.source} />}
-      <Detail.Metadata.Separator />
-      {detail.meanings.map((meaning, index) => (
-        <Detail.Metadata.TagList key={index} title={meaning.partOfSpeech}>
-          {meaning.definitions.slice(0, 3).map((def, defIndex) => (
-            <Detail.Metadata.TagList.Item key={defIndex} text={def} />
-          ))}
-        </Detail.Metadata.TagList>
-      ))}
     </Detail.Metadata>
   );
 }

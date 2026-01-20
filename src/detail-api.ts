@@ -25,8 +25,8 @@ export const fetchWordDetail = async (word: string): Promise<WordDetailData | nu
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-        "Referer": "https://en.dict.naver.com/",
+        Accept: "application/json, text/plain, */*",
+        Referer: "https://en.dict.naver.com/",
       },
     });
 
@@ -69,10 +69,7 @@ const parseWordItem = (item: NaverWordItem): WordDetailData => {
       ?.filter((collector) => collector.means && collector.means.length > 0)
       .map((collector) => ({
         partOfSpeech: collector.partOfSpeech || collector.partOfSpeech2 || "기타",
-        definitions:
-          collector.means
-            ?.map((mean) => stripHtml(mean.value || ""))
-            .filter(Boolean) || [],
+        definitions: collector.means?.map((mean) => stripHtml(mean.value || "")).filter(Boolean) || [],
       }))
       .filter((m) => m.definitions.length > 0) || [];
 

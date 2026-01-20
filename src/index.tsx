@@ -37,11 +37,7 @@ export default function Command() {
   );
 
   return (
-    <List
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      searchBarPlaceholder="Search word..."
-    >
+    <List onSearchTextChange={setSearchText} isLoading={isLoading} searchBarPlaceholder="Search word...">
       {dictionaryData?.map((el) => (
         <List.Item
           key={el.id}
@@ -49,10 +45,7 @@ export default function Command() {
           subtitle={el.subtitle}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="상세보기"
-                target={<WordDetail word={el.title} subtitle={el.subtitle} />}
-              />
+              <Action.Push title="상세보기" target={<WordDetail word={el.title} subtitle={el.subtitle} />} />
               <Action.CopyToClipboard title="단어 복사" content={el.title} />
               <Action.CopyToClipboard
                 title="첫 번째 뜻 복사"
