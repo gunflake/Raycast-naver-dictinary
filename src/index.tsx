@@ -1,36 +1,37 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useDebounce } from "react-use";
-import { DictionaryEntry, getDictionaryData } from "./api";
-import { WordDetail } from "./detail";
-import { getNaverDictionaryUrl } from "./function";
+import { DictionaryEntry, getDictionaryData } from "./api.js";
+import { WordDetail } from "./detail.js";
+import { getNaverDictionaryUrl } from "./function.js";
 
-export default function Command() {
+export default function Command(): JSX.Element {
   const [searchText, setSearchText] = useState("");
   const [dictionaryData, setDictionaryData] = useState<DictionaryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const searchWord = async (query: string) => {
-    if (!query || !query.trim()) {
-      setDictionaryData([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const data = await getDictionaryData(query);
-      setDictionaryData(data);
-    } catch (error) {
-      console.error("An error occurred:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useDebounce(
-    () => {
+    async () => {
+      if (!searchText?.trim()) {
+        setDictionaryData([]);
+        return;
+      }
+
       setIsLoading(true);
-      searchWord(searchText);
+      try {
+        const data = await getDictionaryData(searchText);
+        setDictionaryData(data);
+      } catch (error) {
+        console.error("An error occurred:", error);
+        // Important #4: 사용자에게 에러 피드백 제공
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "검색 실패",
+          message: error instanceof Error ? error.message : "사전 검색 중 오류가 발생했습니다",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
     500,
     [searchText]

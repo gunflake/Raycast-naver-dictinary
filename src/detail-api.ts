@@ -1,69 +1,56 @@
 import axios from "axios";
-import { WordDetailData, NaverDetailApiResponse, NaverWordItem } from "./types";
+import { NaverDetailApiResponse, NaverWordItem, WordDetailData } from "./types.js";
 
 const NAVER_SEARCH_API_URL = "https://en.dict.naver.com/api3/enko/search";
 
-// Entry ID가 있는 경우 정확한 사전 URL 반환
-export const getNaverEntryUrl = (entryId: string): string => {
+export function getNaverEntryUrl(entryId: string): string {
   return `https://en.dict.naver.com/#/entry/enko/${entryId}`;
-};
+}
 
-export const fetchWordDetail = async (word: string): Promise<WordDetailData | null> => {
-  if (!word || !word.trim()) {
+/**
+ * 단어 상세 정보를 가져옵니다.
+ * @returns WordDetailData - 성공 시 상세 정보
+ * @returns null - 단어를 찾을 수 없음 (정상적인 "결과 없음")
+ * @throws Error - API 호출 실패 (네트워크 오류, 서버 오류 등)
+ */
+export async function fetchWordDetail(word: string): Promise<WordDetailData | null> {
+  if (!word?.trim()) {
     return null;
   }
 
-  const trimmedWord = word.trim();
+  // Important #6: 에러는 throw하여 호출자가 "에러"와 "결과 없음"을 구분할 수 있도록 함
+  const response = await axios.get<NaverDetailApiResponse>(NAVER_SEARCH_API_URL, {
+    params: {
+      m: "pc",
+      query: word.trim(),
+    },
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      Accept: "application/json, text/plain, */*",
+      Referer: "https://en.dict.naver.com/",
+    },
+  });
 
-  try {
-    // PC 버전 API 사용 (m=pc) - entryId 포함된 응답
-    const response = await axios.get<NaverDetailApiResponse>(NAVER_SEARCH_API_URL, {
-      params: {
-        m: "pc",
-        query: trimmedWord,
-      },
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept: "application/json, text/plain, */*",
-        Referer: "https://en.dict.naver.com/",
-      },
-    });
-
-    const wordItems = response.data?.searchResultMap?.searchResultListMap?.WORD?.items;
-
-    if (!wordItems || wordItems.length === 0) {
-      return null;
-    }
-
-    // 첫 번째 결과에서 상세 정보 파싱
-    return parseWordItem(wordItems[0]);
-  } catch (error) {
-    console.error(`Error fetching word detail: ${error}`);
-    return null;
+  const wordItems = response.data?.searchResultMap?.searchResultListMap?.WORD?.items;
+  if (!wordItems || wordItems.length === 0) {
+    return null; // "결과 없음" - 정상적인 상황
   }
-};
 
-// HTML 태그 제거 및 텍스트 정리 유틸리티
-const stripHtml = (html: string): string => {
+  return parseWordItem(wordItems[0]);
+}
+
+function stripHtml(html: string): string {
   return html
-    .replace(/<[^>]*>/g, "") // HTML 태그 제거
-    .replace(/\(→[^)]*\)/g, "") // reference word 제거 (→...)
-    .replace(/\s+/g, " ") // 연속 공백 정리
+    .replace(/<[^>]*>/g, "")
+    .replace(/\(→[^)]*\)/g, "")
+    .replace(/\s+/g, " ")
     .trim();
-};
+}
 
-const parseWordItem = (item: NaverWordItem): WordDetailData => {
-  // 단어 추출 (handleEntry가 가장 깨끗한 텍스트)
-  const word = item.handleEntry || stripHtml(item.expEntry || "");
-
-  // 발음 기호 추출
+function parseWordItem(item: NaverWordItem): WordDetailData {
   const phoneticInfo = item.searchPhoneticSymbolList?.find((p) => p.symbolValue);
-  const phonetic = phoneticInfo?.symbolValue;
-  const phoneticType = phoneticInfo?.symbolType || phoneticInfo?.symbolTypeCode;
-  const audioUrl = phoneticInfo?.symbolFile;
 
-  // 품사별 의미 추출 (HTML 태그 제거)
   const meanings =
     item.meansCollector
       ?.filter((collector) => collector.means && collector.means.length > 0)
@@ -74,13 +61,13 @@ const parseWordItem = (item: NaverWordItem): WordDetailData => {
       .filter((m) => m.definitions.length > 0) || [];
 
   return {
-    word,
+    word: item.handleEntry || stripHtml(item.expEntry || ""),
     entryId: item.entryId,
-    phonetic,
-    phoneticType,
-    audioUrl,
+    phonetic: phoneticInfo?.symbolValue,
+    phoneticType: phoneticInfo?.symbolType || phoneticInfo?.symbolTypeCode,
+    audioUrl: phoneticInfo?.symbolFile,
     source: item.sourceDictnameKO,
     dictType: item.expDictTypeForm,
     meanings,
   };
-};
+}

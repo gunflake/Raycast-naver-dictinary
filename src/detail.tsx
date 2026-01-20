@@ -1,15 +1,15 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchWordDetail, getNaverEntryUrl } from "./detail-api";
-import { getNaverDictionaryUrl } from "./function";
-import { WordDetailData } from "./types";
+import { fetchWordDetail, getNaverEntryUrl } from "./detail-api.js";
+import { getNaverDictionaryUrl } from "./function.js";
+import { WordDetailData } from "./types.js";
 
-interface WordDetailProps {
+interface Props {
   word: string;
   subtitle?: string;
 }
 
-export function WordDetail({ word, subtitle }: WordDetailProps) {
+export function WordDetail({ word, subtitle }: Props): JSX.Element {
   const [detail, setDetail] = useState<WordDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,12 +67,8 @@ export function WordDetail({ word, subtitle }: WordDetailProps) {
   );
 }
 
-function WordMetadata({ detail }: { detail: WordDetailData }) {
-  const phoneticText = detail.phonetic
-    ? detail.phoneticType
-      ? `/${detail.phonetic}/ (${detail.phoneticType})`
-      : `/${detail.phonetic}/`
-    : undefined;
+function WordMetadata({ detail }: { detail: WordDetailData }): JSX.Element {
+  const phoneticText = formatPhoneticText(detail.phonetic, detail.phoneticType);
 
   return (
     <Detail.Metadata>
@@ -81,6 +77,16 @@ function WordMetadata({ detail }: { detail: WordDetailData }) {
       {detail.source && <Detail.Metadata.Label title="출처" text={detail.source} />}
     </Detail.Metadata>
   );
+}
+
+function formatPhoneticText(phonetic?: string, phoneticType?: string): string | undefined {
+  if (!phonetic) {
+    return undefined;
+  }
+  if (phoneticType) {
+    return `/${phonetic}/ (${phoneticType})`;
+  }
+  return `/${phonetic}/`;
 }
 
 function generateMarkdown(
