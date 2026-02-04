@@ -1,59 +1,63 @@
 import axios from "axios";
 import * as crypto from "crypto";
+import { DictionaryEntry } from "./types.js";
+
+export type { DictionaryEntry } from "./types.js";
 
 const NAVER_DICTIONARY_URL = "https://ac-dict.naver.com/enko/ac";
 
-export interface DictionaryEntry {
-  id: string;
-  title: string;
-  subtitle: string;
+/**
+ * 네이버 자동완성 API 응답 구조
+ * items[categoryIndex][entryIndex][fieldIndex][valueIndex]
+ * - fieldIndex 0: 검색어 (영단어)
+ * - fieldIndex 2: 뜻 (한글 번역)
+ */
+interface AutocompleteResponse {
+  items?: AutocompleteItem[][][];
 }
 
-export const getDictionaryData = async (word: string): Promise<DictionaryEntry[]> => {
-  const url = NAVER_DICTIONARY_URL;
-  const params = {
-    q_enc: "utf-8",
-    st: 11001,
-    r_format: "json",
-    r_enc: "utf-8",
-    r_lt: 10001,
-    r_unicode: 0,
-    r_escape: 1,
-    q: word,
-  };
+/** 자동완성 항목 - [값, ...추가정보] 형태의 배열 */
+type AutocompleteItem = string[];
 
-  try {
-    const response = await axios.get(url, { params });
-
-    const result = await processData(response.data);
-    return result ?? [];
-  } catch (error) {
-    console.error(`Error occurred: ${error}`);
-    throw error;
+export async function getDictionaryData(word: string): Promise<DictionaryEntry[]> {
+  if (!word?.trim()) {
+    return [];
   }
-};
 
-const processData = async (data: any) => {
-  try {
-    const results: DictionaryEntry[] = []; 
+  const trimmedWord = word.trim();
 
+  const response = await axios.get<AutocompleteResponse>(NAVER_DICTIONARY_URL, {
+    params: {
+      q_enc: "utf-8",
+      st: 11001,
+      r_format: "json",
+      r_enc: "utf-8",
+      r_lt: 10001,
+      r_unicode: 0,
+      r_escape: 1,
+      q: trimmedWord,
+    },
+  });
 
-    for (const items of data["items"]) {
-      for (const item of items) {
-        if (item.length > 0) {
-          const txt = item[0][0];
-          const rtxt = item[2][0];
-          results.push({
-            id: crypto.randomUUID(),
-            title: txt,
-            subtitle: rtxt,
-          });
-        }
-      }
-    }
+  return processData(response.data);
+}
 
-    return results;
-  } catch (error) {
-    console.error(`Error occurred: ${error}`);
+function processData(data: AutocompleteResponse): DictionaryEntry[] {
+  // Critical #2: data.items null 체크
+  if (!data.items) {
+    return [];
   }
-};
+
+  return data.items.flatMap((items) =>
+    items
+      // Critical #1: 중첩 배열 접근 전 유효성 검사
+      .filter((item) => {
+        return item.length > 2 && item[0]?.[0] !== undefined && item[2]?.[0] !== undefined;
+      })
+      .map((item) => ({
+        id: crypto.randomUUID(),
+        title: item[0][0],
+        subtitle: item[2][0],
+      }))
+  );
+}

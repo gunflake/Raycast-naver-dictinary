@@ -1,9 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-naver-english-dictionary",
-  "title": "search-naver-english-dictionary",
-  "description": "Search word",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "title": "네이버 영한 사전",
+  "description": "네이버 영한 사전에서 단어 검색",
   "icon": "command-icon.png",
+  "keywords": ["naver", "dict", "dictionary", "사전", "영어", "english", "번역"],
   "author": "gunflake09",
   "categories": [
     "Applications"
@@ -12,9 +17,10 @@
   "commands": [
     {
       "name": "index",
-      "title": "Naver English Dictinary",
-      "description": "Search word in Naver Dictionary",
-      "mode": "view"
+      "title": "단어 검색",
+      "description": "네이버 영한 사전에서 단어 검색",
+      "mode": "view",
+      "keywords": ["naver", "dict", "dictionary", "사전", "영어", "english", "번역"]
     }
   ],
   "dependencies": {
@@ -31,10 +37,10 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist && open \"raycast://extensions/install?path=$(pwd)\"",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "pnpm dlx @raycast/api@latest publish"
   }
 }
